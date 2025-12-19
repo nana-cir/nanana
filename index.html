@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NANA CIRCLE 営業サポート</title>
+  <title>営業サポートテスト</title>
   <style>
     body { font-family: sans-serif; margin: 16px; background-color: #f4f7f6; color: #333; }
     .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -79,14 +79,14 @@ async function loadCSV() {
 
 document.addEventListener("DOMContentLoaded", () => {
   loadCSV();
-  const MY_PASSCODE = "docomo";
+  const MY_PASSCODE = "test";
 
   document.getElementById("unlockBtn").addEventListener("click", () => {
     if (document.getElementById("passcode").value === MY_PASSCODE) {
       sessionStorage.setItem("nc_unlocked", "1");
       location.reload();
     } else {
-      document.getElementById("lockMsg").innerHTML = "パスコードが違います<br>ヒント：ドコモ";
+      document.getElementById("lockMsg").innerHTML = "パスコードが違います<br>ヒント：テスト";
     }
   });
 
@@ -139,4 +139,5 @@ document.getElementById("judgeBtn").addEventListener("click", () => {
 });
 </script>
 </body>
+
 </html>
