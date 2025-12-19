@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NANA CIRCLE 営業サポート</title>
+  <style>
+    body { font-family: sans-serif; margin: 16px; background-color: #f4f7f6; color: #333; }
+    .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    label { display: block; margin: 12px 0 6px; font-weight: bold; font-size: 14px; }
+    select, input, button { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+    button { cursor: pointer; font-weight: 700; background-color: #005599; color: white; border: none; margin-top: 16px; }
+    .result-box { display: none; border-left: 6px solid #e67e22; background: #fff9f5; }
+    .hidden { display: none; }
+    .highlight { color: #d32f2f; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="lockCard">
+    <h3>🔒 パスコード入力</h3>
+    <input id="passcode" type="password" placeholder="パスコードを入力" />
+    <button id="unlockBtn">ロック解除</button>
+    <p id="lockMsg" style="color:red; font-size:12px;"></p>
+  </div>
+
+  <div id="appBody" class="hidden">
+    <h2 style="font-size: 1.1em; color: #005599;">OCN光 IPoE 営業提案支援</h2>
+    <div class="card">
+      <label>① ルーターの型番（自前品）</label>
+      <input type="text" id="routerModel" placeholder="例: RTX830">
+      <label>② 固定IPの必要性</label>
+      <select id="needFixed">
+        <option value="no">不要（動的IP）</option>
+        <option value="yes">必要（固定IP）</option>
+        <option value="unknown">不明</option>
+      </select>
+      <label>③ 回線速度</label>
+      <select id="lineSpeed">
+        <option value="1g">1ギガ（ネクスト）</option>
+        <option value="10g">10ギガ（クロス）</option>
+      </select>
+      <label>④ Web会議の頻度</label>
+      <select id="webMeeting">
+        <option value="high">多い（Teams/Zoom等）</option>
+        <option value="low">無し・または少ない</option>
+        <option value="unknown">頻度は分からない</option>
+      </select>
+      <button id="judgeBtn">提案内容を判定</button>
+    </div>
+    <div class="card result-box" id="resultArea">
+      <h3 style="margin-top:0; color: #e67e22;">📋 営業提案シート</h3>
+      <p id="resultText" style="line-height: 1.6;"></p>
+    </div>
+  </div>
+
+<script>
+let routerDB = [];
+
+// CSVを読み込む関数
+async function loadCSV() {
+    try {
+        const response = await fetch('router_db.csv');
+        const text = await response.text();
+        const rows = text.split('\n').slice(1); // ヘッダーを飛ばす
+        routerDB = rows.map(row => {
+            const cols = row.split(',');
+            if(cols.length < 2) return null;
+            return {
+                model: cols[0].trim(),
+                normalized: cols[0].trim().toUpperCase().replace(/[^A-Z0-9]/g, ""),
+                is10G: cols[1].trim() === "1"
+            };
+        }).filter(r => r !== null);
+    } catch (e) {
+        console.error("CSV読み込み失敗", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCSV();
+  const MY_PASSCODE = "docomo";
+
+  document.getElementById("unlockBtn").addEventListener("click", () => {
+    if (document.getElementById("passcode").value === MY_PASSCODE) {
+      sessionStorage.setItem("nc_unlocked", "1");
+      location.reload();
+    } else {
+      document.getElementById("lockMsg").innerHTML = "パスコードが違います<br>ヒント：ドコモ";
+    }
+  });
+
+  if (sessionStorage.getItem("nc_unlocked") === "1") {
+    document.getElementById("lockCard").classList.add("hidden");
+    document.getElementById("appBody").classList.remove("hidden");
+  }
+
+document.getElementById("judgeBtn").addEventListener("click", () => {
+    const rawInput = document.getElementById("routerModel").value;
+    const fixedSelection = document.getElementById("needFixed").value;
+    const speedSelection = document.getElementById("lineSpeed").value;
+    const meetingFreq = document.getElementById("webMeeting").value;
+
+    const normalizedInput = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    
+    // 検索ロジック強化：入力文字がDBの型番を含んでいるか、またはその逆を判定
+    const foundRouter = routerDB.find(r => {
+        return normalizedInput.includes(r.normalized) || r.normalized.includes(normalizedInput);
+    });
+    
+    // ...以降の判定ロジックは前回と同じ...
+    
+    let plan = (fixedSelection === "no") ? "BOCN IPoE 標準プラン（動的IP）" : "BOCN IPoE 固定IPプラン（標準/ワイド）";
+    let routerInfo = "";
+
+    if (speedSelection === "10g") {
+      if (foundRouter && foundRouter.is10G) {
+        routerInfo = `既存ルーター(${foundRouter.model})は10G対応のため、そのまま利用可能です。`;
+      } else {
+        routerInfo = "<span class='highlight'>10G(クロス)対応のIPoEルーターを新規購入いただく必要があります。</span>";
+      }
+    } else {
+      if (foundRouter) {
+        routerInfo = `既存ルーター(${foundRouter.model})はIPoE対応のため、そのまま利用可能です。`;
+      } else {
+        if (fixedSelection === "no") {
+          routerInfo = "<span class='highlight'>IPoE対応ルーターを新規購入いただく必要があります。</span>";
+        } else {
+          routerInfo = "<span class='highlight'>「レンタルルーター02」の申込み、または「IPoE対応ルーター」をご自身で購入</span>いただく必要があります。";
+        }
+      }
+    }
+
+    let optionInfo = (meetingFreq === "high") ? "【重要】Web会議が多いため、<strong>「アプリコントロールA」</strong>を併せておススメしてください。" : "必要に応じて後日<strong>「アプリコントロールA」</strong>の追加も可能です。";
+
+    document.getElementById("resultText").innerHTML = `<strong>【推奨】${plan}</strong><br><br><strong>■ ルーター</strong><br>${routerInfo}<br><br><strong>■ 補足</strong><br>${optionInfo}`;
+    document.getElementById("resultArea").style.display = "block";
+  });
+});
+</script>
+</body>
+</html>
