@@ -10,7 +10,17 @@
     h2 { font-size: 1.2em; color: #005599; margin-top: 0; }
     h3 { margin-top: 0; font-size: 1.1em; }
     label { display: block; margin: 15px 0 8px; font-weight: bold; font-size: 14px; color: #444; }
-    input[type="text"], input[type="number"], select, button { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 16px; }
+    
+    /* 入力欄のスタイル */
+    input[type="text"], input[type="number"], input[type="password"], select, button { 
+      width: 100%; 
+      padding: 12px; 
+      border-radius: 8px; 
+      border: 1px solid #ccc; 
+      box-sizing: border-box; 
+      font-size: 16px; 
+    }
+
     input[type="checkbox"] { transform: scale(1.2); margin-right: 8px; }
     button { cursor: pointer; font-weight: 700; background-color: #005599; color: white; border: none; margin-top: 24px; padding: 16px; font-size: 18px; transition: background 0.3s; }
     button:hover { background-color: #003366; }
@@ -139,15 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const deviceCount = parseInt(document.getElementById("deviceCount").value) || 0;
     
     // 1. 固定IPが必要かどうかの判定
-    // 【変更点】固定IP必須項目(class="fixed-need")だけに絞ってチェック数を数える
     const fixedChecks = document.querySelectorAll('.fixed-need:checked');
     const isUnknown = document.getElementById('usageUnknown').checked;
-    // 「特になし」は判定に使わないが、これを選ぶことで動的になりうる
     
-    let planType = "dynamic"; // 初期値: 動的
+    let planType = "dynamic"; 
     let reason = "";
 
-    // 条件A: 利用用途による判定（必須項目にチェックがあるか？）
+    // 条件A: 利用用途による判定
     if (fixedChecks.length > 0) {
         planType = "fixed";
         reason = "VPNや防犯カメラ等の利用用途があるため、固定IP必須です。";
@@ -162,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
         planType = "unknown";
         reason = "利用用途が不明なため、念のため固定IPプランでの提案を推奨します。";
     }
-    // 上記どれにも当てはまらなければ「特になし」や「空白」扱いとなり、動的プラン(dynamic)のまま
 
     // 2. プラン名の決定
     let planName = "";
@@ -187,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (foundRouter) {
         routerInfo = `既存ルーター(${foundRouter.model})はIPoE対応のため、そのまま利用可能です。`;
       } else {
-        // 固定IPが必要なら、レンタルルーター02を推す
         if (planType === "fixed" || planType === "unknown") {
              routerInfo = "<span class='highlight'>「レンタルルーター02」の申込み、または「IPoE対応ルーター」を購入</span>してください。<br><small>※台数が多い場合は高性能な購入ルーターを推奨</small>";
         } else {
@@ -197,22 +203,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 4. アプリコントロールA
-    let optionInfo = (meetingFreq === "high") ? 
-        "【重要】Web会議が多いため、通信帯域を優先制御する<strong>「アプリコントロールA」</strong>を併せて提案してください。" : 
-        "必要に応じて後日<strong>「アプリコントロールA」</strong>の追加も可能です。";
-
-    // 結果出力
-    let finalHtml = `<strong>【推奨】${planName}</strong><br><small style="color:#666;">（判定理由: ${reason || "一般的な利用のため標準プランでOK"}）</small><br><br>`;
-    finalHtml += `<strong>■ ルーター対応</strong><br>${routerInfo}<br><br>`;
-    finalHtml += `<strong>■ オプション提案</strong><br>${optionInfo}`;
-
-    document.getElementById("resultText").innerHTML = finalHtml;
-    
-    // お昼ご飯
-    document.getElementById("luckyItem").textContent = "🍽️ お昼ご飯に迷ったら・・・ " + getLunchSuggestion();
-    document.getElementById("resultArea").style.display = "block";
-  });
-});
-</script>
-</body>
-</html>
+    let optionInfo = (meetingFreq === "high
