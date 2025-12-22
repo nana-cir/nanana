@@ -48,14 +48,41 @@
       </select>
       <button id="judgeBtn">提案内容を判定</button>
     </div>
+
     <div class="card result-box" id="resultArea">
       <h3 style="margin-top:0; color: #e67e22;">📋 営業提案シート</h3>
       <p id="resultText" style="line-height: 1.6;"></p>
-    </div>
+      
+      <hr style="border: 0; border-top: 1px dashed #ccc; margin: 16px 0;">
+      <p id="luckyItem" style="font-size: 14px; color: #555; font-weight: bold;"></p>
+      </div>
   </div>
 
 <script>
 let routerDB = [];
+
+// 🍽️ お昼ご飯の提案リスト（ここに追加しました！）
+const lunchList = [
+  "🍜 ラーメン",
+  "🍲 うどん",
+  "🥢 そば",
+  "🍗 唐揚げ定食",
+  "🍛 カレーライス",
+  "🥞 お好み焼き",
+  "🍝 イタリアン",
+  "🍱 うなぎ（豪華！）",
+  "🍙 おにぎり",
+  "🍫 チョコレート（軽めに...）",
+  "🏃‍♂️ ダイエット！（水でも飲もう）",
+  "🍔 ハンバーガー",
+  "🥗 コンビニのサラダチキン"
+];
+
+function getLunchSuggestion() {
+  const i = Math.floor(Math.random() * lunchList.length);
+  return lunchList[i];
+}
+
 
 // CSVを読み込む関数
 async function loadCSV() {
@@ -103,12 +130,10 @@ document.getElementById("judgeBtn").addEventListener("click", () => {
 
     const normalizedInput = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, "");
     
-    // 検索ロジック強化：入力文字がDBの型番を含んでいるか、またはその逆を判定
+    // 検索ロジック
     const foundRouter = routerDB.find(r => {
         return normalizedInput.includes(r.normalized) || r.normalized.includes(normalizedInput);
     });
-    
-    // ...以降の判定ロジックは前回と同じ...
     
     let plan = (fixedSelection === "no") ? "BOCN IPoE 標準プラン（動的IP）" : "BOCN IPoE 固定IPプラン（標準/ワイド）";
     let routerInfo = "";
@@ -134,10 +159,14 @@ document.getElementById("judgeBtn").addEventListener("click", () => {
     let optionInfo = (meetingFreq === "high") ? "【重要】Web会議が多いため、<strong>「アプリコントロールA」</strong>を併せておススメしてください。" : "必要に応じて後日<strong>「アプリコントロールA」</strong>の追加も可能です。";
 
     document.getElementById("resultText").innerHTML = `<strong>【推奨】${plan}</strong><br><br><strong>■ ルーター</strong><br>${routerInfo}<br><br><strong>■ 補足</strong><br>${optionInfo}`;
+    
+    // ▼▼▼ ここでお昼ご飯の結果を表示！ ▼▼▼
+    const luckyEl = document.getElementById("luckyItem");
+    luckyEl.textContent = "🍽️ お昼ご飯に迷ったら・・・ " + getLunchSuggestion();
+
     document.getElementById("resultArea").style.display = "block";
   });
 });
 </script>
 </body>
-
 </html>
