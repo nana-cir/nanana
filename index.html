@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>営業サポートツール</title>
   <style>
-    body { font-family: "Helvetica Neue", Arial, sans-serif; margin: 16px; background-color: #f0f2f5; color: #333; }
+    body { font-family: sans-serif; margin: 16px; background-color: #f0f2f5; color: #333; }
     .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     h2 { font-size: 1.2em; color: #005599; margin-top: 0; }
     h3 { margin-top: 0; font-size: 1.1em; }
     label { display: block; margin: 15px 0 8px; font-weight: bold; font-size: 14px; color: #444; }
     
-    /* 入力欄のスタイル */
+    /* 入力欄のデザイン */
     input[type="text"], input[type="number"], input[type="password"], select, button { 
       width: 100%; 
       padding: 12px; 
@@ -22,12 +22,12 @@
     }
 
     input[type="checkbox"] { transform: scale(1.2); margin-right: 8px; }
-    button { cursor: pointer; font-weight: 700; background-color: #005599; color: white; border: none; margin-top: 24px; padding: 16px; font-size: 18px; transition: background 0.3s; }
+    button { cursor: pointer; font-weight: 700; background-color: #005599; color: white; border: none; margin-top: 24px; padding: 16px; font-size: 18px; }
     button:hover { background-color: #003366; }
     .result-box { display: none; border-left: 6px solid #e67e22; background: #fff9f5; }
     .hidden { display: none; }
     .highlight { color: #d32f2f; font-weight: bold; background: #ffeaea; padding: 2px 4px; border-radius: 4px; }
-    .check-group label { display: block; font-weight: normal; margin-bottom: 8px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background 0.2s; }
+    .check-group label { display: block; font-weight: normal; margin-bottom: 8px; cursor: pointer; padding: 8px; border-radius: 6px; }
     .check-group label:hover { background: #f0f0f0; }
     hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
   </style>
@@ -36,7 +36,7 @@
 
   <div class="card" id="lockCard">
     <h3>🔒 パスコード入力</h3>
-    <input id="passcode" type="password" placeholder="パスコード" />
+    <input id="passcode" type="password" placeholder="パスコードを入力" />
     <button id="unlockBtn">ロック解除</button>
     <p id="lockMsg" style="color:red; font-size:12px; margin-top:10px;"></p>
   </div>
@@ -48,22 +48,20 @@
       <label>① ルーターの型番（自前利用の場合）</label>
       <input type="text" id="routerModel" placeholder="例: RTX830 (空欄でもOK)">
 
-      <label>② インターネットの利用方法（複数選択）</label>
+      <label>② インターネットの利用方法</label>
       <div class="check-group" style="background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #ddd;">
-        <label><input type="checkbox" class="fixed-need" value="vpn"> 外から社内データを見る（VPN/リモート）</label>
+        <label><input type="checkbox" class="fixed-need" value="vpn"> 外から社内データを見る（VPN）</label>
         <label><input type="checkbox" class="fixed-need" value="camera"> 防犯カメラを外部から確認</label>
-        <label><input type="checkbox" class="fixed-need" value="restrict"> 特定IP制限のあるサイト利用（銀行等）</label>
+        <label><input type="checkbox" class="fixed-need" value="restrict"> 特定IP制限のあるサイト利用</label>
         <label><input type="checkbox" class="fixed-need" value="server"> 社内にサーバーがある</label>
-        
         <hr style="margin: 8px 0; border:0; border-top:1px solid #ddd;">
-        
-        <label><input type="checkbox" id="usageNone"> 特になし（Web閲覧・メール・動画のみ）</label>
+        <label><input type="checkbox" id="usageNone"> 特になし（Web閲覧のみ）</label>
         <label style="color:#666;"><input type="checkbox" id="usageUnknown"> よく分からない</label>
       </div>
 
-      <label>③ 接続する端末の台数（PC/スマホ等）</label>
+      <label>③ 接続する端末の台数</label>
       <input type="number" id="deviceCount" placeholder="数字で入力（例: 5）" min="0">
-      <p style="font-size:12px; color:#666; margin-top:4px;">※台数が多いと通信制限にかかる可能性があります</p>
+      <p style="font-size:12px; color:#666; margin-top:4px;">※台数が多いと通信制限の懸念あり</p>
 
       <label>④ 回線速度（希望・予定）</label>
       <select id="lineSpeed">
@@ -84,7 +82,6 @@
     <div class="card result-box" id="resultArea">
       <h3 style="color: #e67e22;">📋 提案内容</h3>
       <p id="resultText" style="line-height: 1.8;"></p>
-      
       <hr>
       <p id="luckyItem" style="font-size: 14px; color: #555; font-weight: bold; text-align: center;"></p>
     </div>
@@ -92,17 +89,7 @@
 
 <script>
 let routerDB = [];
-
-// 🍽️ お昼ご飯リスト
-const lunchList = [
-  "🍜 ラーメン", "🍲 うどん", "🥢 そば", "🍗 唐揚げ定食", "🍛 カレーライス", 
-  "🥞 お好み焼き", "🍝 イタリアン", "🍱 うなぎ（契約取れたら！）", "🍙 おにぎり", 
-  "🍫 チョコレート", "🏃‍♂️ ダイエット（我慢）", "🍔 ハンバーガー", "🥗 サラダチキン"
-];
-
-function getLunchSuggestion() {
-  return lunchList[Math.floor(Math.random() * lunchList.length)];
-}
+const lunchList = ["🍜 ラーメン", "🍲 うどん", "🥢 そば", "🍗 唐揚げ定食", "🍛 カレーライス", "🥞 お好み焼き", "🍝 イタリアン", "🍱 うなぎ", "🍙 おにぎり", "🍫 チョコレート", "🏃‍♂️ ダイエット", "🍔 ハンバーガー", "🥗 サラダチキン"];
 
 // CSV読み込み
 async function loadCSV() {
@@ -119,88 +106,96 @@ async function loadCSV() {
                 is10G: cols[1].trim() === "1"
             };
         }).filter(r => r !== null);
-    } catch (e) { console.error("CSV error", e); }
+    } catch (e) { console.error(e); }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   loadCSV();
   const MY_PASSCODE = "test";
 
-  // ロック解除
-  document.getElementById("unlockBtn").addEventListener("click", () => {
-    if (document.getElementById("passcode").value === MY_PASSCODE) {
-      sessionStorage.setItem("nc_unlocked", "1");
-      location.reload();
-    } else {
-      document.getElementById("lockMsg").innerHTML = "パスコードが違います<br>ヒント：テスト";
-    }
-  });
-
-  if (sessionStorage.getItem("nc_unlocked") === "1") {
-    document.getElementById("lockCard").classList.add("hidden");
-    document.getElementById("appBody").classList.remove("hidden");
+  // ▼ パスコード判定 ▼
+  const unlockBtn = document.getElementById("unlockBtn");
+  if(unlockBtn){
+      unlockBtn.addEventListener("click", () => {
+        const inputVal = document.getElementById("passcode").value;
+        if (inputVal === MY_PASSCODE) {
+          sessionStorage.setItem("nc_unlocked", "1");
+          location.reload();
+        } else {
+          document.getElementById("lockMsg").innerHTML = "パスコードが違います<br>ヒント：テスト";
+        }
+      });
   }
 
-  // ▼▼▼ 判定ロジック ▼▼▼
-  document.getElementById("judgeBtn").addEventListener("click", () => {
-    const rawInput = document.getElementById("routerModel").value;
-    const speedSelection = document.getElementById("lineSpeed").value;
-    const meetingFreq = document.getElementById("webMeeting").value;
-    const deviceCount = parseInt(document.getElementById("deviceCount").value) || 0;
-    
-    // 1. 固定IPが必要かどうかの判定
-    const fixedChecks = document.querySelectorAll('.fixed-need:checked');
-    const isUnknown = document.getElementById('usageUnknown').checked;
-    
-    let planType = "dynamic"; 
-    let reason = "";
+  // ▼ ロック解除状態の確認 ▼
+  if (sessionStorage.getItem("nc_unlocked") === "1") {
+    document.getElementById("lockCard").style.display = "none";
+    document.getElementById("appBody").style.display = "block";
+  }
 
-    // 条件A: 利用用途による判定
-    if (fixedChecks.length > 0) {
-        planType = "fixed";
-        reason = "VPNや防犯カメラ等の利用用途があるため、固定IP必須です。";
-    } 
-    // 条件B: 接続台数による判定
-    else if (deviceCount >= 10) {
-        planType = "fixed";
-        reason = `接続台数が${deviceCount}台と多いため、標準プランでは通信セッション不足で不安定になる恐れがあります。<br>ルーター側でセッション管理ができる固定IPプランを強く推奨します。`;
-    }
-    // 条件C: 不明の場合
-    else if (isUnknown) {
-        planType = "unknown";
-        reason = "利用用途が不明なため、念のため固定IPプランでの提案を推奨します。";
-    }
+  // ▼ 診断ボタン判定 ▼
+  const judgeBtn = document.getElementById("judgeBtn");
+  if(judgeBtn){
+    judgeBtn.addEventListener("click", () => {
+        const rawInput = document.getElementById("routerModel").value;
+        const speedSelection = document.getElementById("lineSpeed").value;
+        const meetingFreq = document.getElementById("webMeeting").value;
+        const deviceCount = parseInt(document.getElementById("deviceCount").value) || 0;
+        
+        const fixedChecks = document.querySelectorAll('.fixed-need:checked');
+        const isUnknown = document.getElementById('usageUnknown').checked;
+        
+        let planType = "dynamic"; 
+        let reason = "";
 
-    // 2. プラン名の決定
-    let planName = "";
-    if (planType === "fixed" || planType === "unknown") {
-        planName = "BOCN IPoE 固定IPプラン（標準/ワイド）";
-    } else {
-        planName = "BOCN IPoE 標準プラン（動的IP）";
-    }
-
-    // 3. ルーター判定
-    const normalizedInput = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    const foundRouter = routerDB.find(r => normalizedInput && (normalizedInput.includes(r.normalized) || r.normalized.includes(normalizedInput)));
-    
-    let routerInfo = "";
-    if (speedSelection === "10g") {
-      if (foundRouter && foundRouter.is10G) {
-        routerInfo = `既存ルーター(${foundRouter.model})は10G対応のため、そのまま利用可能です。`;
-      } else {
-        routerInfo = "<span class='highlight'>10G(クロス)対応のIPoEルーターを新規購入いただく必要があります。</span>";
-      }
-    } else {
-      if (foundRouter) {
-        routerInfo = `既存ルーター(${foundRouter.model})はIPoE対応のため、そのまま利用可能です。`;
-      } else {
-        if (planType === "fixed" || planType === "unknown") {
-             routerInfo = "<span class='highlight'>「レンタルルーター02」の申込み、または「IPoE対応ルーター」を購入</span>してください。<br><small>※台数が多い場合は高性能な購入ルーターを推奨</small>";
-        } else {
-             routerInfo = "<span class='highlight'>IPoE対応ルーターを新規購入いただく必要があります。</span>";
+        if (fixedChecks.length > 0) {
+            planType = "fixed";
+            reason = "VPNや防犯カメラ等の利用用途があるため、固定IP必須です。";
+        } else if (deviceCount >= 10) {
+            planType = "fixed";
+            reason = `接続台数が${deviceCount}台と多いため、通信安定性を重視し固定IPプランを推奨します。`;
+        } else if (isUnknown) {
+            planType = "unknown";
+            reason = "利用用途が不明なため、念のため固定IPプランでの提案を推奨します。";
         }
-      }
-    }
 
-    // 4. アプリコントロールA
-    let optionInfo = (meetingFreq === "high
+        let planName = (planType === "fixed" || planType === "unknown") ? "BOCN IPoE 固定IPプラン" : "BOCN IPoE 標準プラン（動的IP）";
+
+        // ルーター判定
+        const normalizedInput = rawInput.toUpperCase().replace(/[^A-Z0-9]/g, "");
+        const foundRouter = routerDB.find(r => normalizedInput && (normalizedInput.includes(r.normalized) || r.normalized.includes(normalizedInput)));
+        
+        let routerInfo = "";
+        if (speedSelection === "10g") {
+          if (foundRouter && foundRouter.is10G) {
+            routerInfo = `既存ルーター(${foundRouter.model})は10G対応のため利用可能です。`;
+          } else {
+            routerInfo = "<span class='highlight'>10G(クロス)対応IPoEルーターを購入してください。</span>";
+          }
+        } else {
+          if (foundRouter) {
+            routerInfo = `既存ルーター(${foundRouter.model})はIPoE対応のため利用可能です。`;
+          } else {
+            if (planType === "fixed" || planType === "unknown") {
+                 routerInfo = "<span class='highlight'>「レンタルルーター02」または「IPoE対応ルーター」を用意</span>してください。";
+            } else {
+                 routerInfo = "<span class='highlight'>IPoE対応ルーターを新規購入いただく必要があります。</span>";
+            }
+          }
+        }
+
+        let optionInfo = (meetingFreq === "high") ? "Web会議が多いため<strong>「アプリコントロールA」</strong>を提案してください。" : "必要に応じて後日<strong>「アプリコントロールA」</strong>を追加可能です。";
+
+        document.getElementById("resultText").innerHTML = `<strong>【推奨】${planName}</strong><br><small style='color:#666;'>（理由: ${reason || "標準的な利用のため"}）</small><br><br><strong>■ ルーター</strong><br>${routerInfo}<br><br><strong>■ オプション</strong><br>${optionInfo}`;
+        
+        document.getElementById("luckyItem").textContent = "🍽️ お昼ご飯の提案： " + lunchList[Math.floor(Math.random() * lunchList.length)];
+        
+        const resultArea = document.getElementById("resultArea");
+        resultArea.style.display = "block";
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+  }
+});
+</script>
+</body>
+</html>
