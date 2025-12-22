@@ -40,10 +40,14 @@
 
       <label>② インターネットの利用方法（複数選択）</label>
       <div class="check-group" style="background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #ddd;">
-        <label><input type="checkbox" class="usage-check" value="vpn"> 外から社内データを見る（VPN/リモート）</label>
-        <label><input type="checkbox" class="usage-check" value="camera"> 防犯カメラを外部から確認</label>
-        <label><input type="checkbox" class="usage-check" value="restrict"> 特定IP制限のあるサイト利用（銀行等）</label>
-        <label><input type="checkbox" class="usage-check" value="server"> 社内にサーバーがある</label>
+        <label><input type="checkbox" class="fixed-need" value="vpn"> 外から社内データを見る（VPN/リモート）</label>
+        <label><input type="checkbox" class="fixed-need" value="camera"> 防犯カメラを外部から確認</label>
+        <label><input type="checkbox" class="fixed-need" value="restrict"> 特定IP制限のあるサイト利用（銀行等）</label>
+        <label><input type="checkbox" class="fixed-need" value="server"> 社内にサーバーがある</label>
+        
+        <hr style="margin: 8px 0; border:0; border-top:1px solid #ddd;">
+        
+        <label><input type="checkbox" id="usageNone"> 特になし（Web閲覧・メール・動画のみ）</label>
         <label style="color:#666;"><input type="checkbox" id="usageUnknown"> よく分からない</label>
       </div>
 
@@ -135,18 +139,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const deviceCount = parseInt(document.getElementById("deviceCount").value) || 0;
     
     // 1. 固定IPが必要かどうかの判定
-    const checks = document.querySelectorAll('.usage-check:checked');
+    // 【変更点】固定IP必須項目(class="fixed-need")だけに絞ってチェック数を数える
+    const fixedChecks = document.querySelectorAll('.fixed-need:checked');
     const isUnknown = document.getElementById('usageUnknown').checked;
+    // 「特になし」は判定に使わないが、これを選ぶことで動的になりうる
     
     let planType = "dynamic"; // 初期値: 動的
     let reason = "";
 
-    // 条件A: 利用用途による判定
-    if (checks.length > 0) {
+    // 条件A: 利用用途による判定（必須項目にチェックがあるか？）
+    if (fixedChecks.length > 0) {
         planType = "fixed";
         reason = "VPNや防犯カメラ等の利用用途があるため、固定IP必須です。";
     } 
-    // 条件B: 接続台数による判定（ここが新機能！）
+    // 条件B: 接続台数による判定
     else if (deviceCount >= 10) {
         planType = "fixed";
         reason = `接続台数が${deviceCount}台と多いため、標準プランでは通信セッション不足で不安定になる恐れがあります。<br>ルーター側でセッション管理ができる固定IPプランを強く推奨します。`;
@@ -156,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
         planType = "unknown";
         reason = "利用用途が不明なため、念のため固定IPプランでの提案を推奨します。";
     }
+    // 上記どれにも当てはまらなければ「特になし」や「空白」扱いとなり、動的プラン(dynamic)のまま
 
     // 2. プラン名の決定
     let planName = "";
